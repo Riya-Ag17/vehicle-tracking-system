@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vehicle Tracking System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 500px; width: 100%; }
+    </style>
+</head>
+<body>
+    <h2>Vehicle Tracking System</h2>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([0, 0], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker = L.marker([0, 0]).addTo(map);
+
+        // Track live location
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(
+                function(position) {
+                    let lat = position.coords.latitude;
+                    let lng = position.coords.longitude;
+                    let speed = position.coords.speed; // in m/s (may be null)
+
+                    // Convert speed to km/h if available
+                    let speedKmH = speed !== null ? (speed * 3.6).toFixed(2) : "N/A";
+
+                    marker.setLatLng([lat, lng]);
+                    marker.bindPopup(
+                        `<b>Vehicle ID:</b> VH-101<br>
+                         <b>Latitude:</b> ${lat.toFixed(5)}<br>
+                         <b>Longitude:</b> ${lng.toFixed(5)}<br>
+                         <b>Speed:</b> ${speedKmH} km/h`
+                    ).openPopup();
+
+                    map.setView([lat, lng], 16);
+                },
+                function(error) {
+                    alert("Error getting location: " + error.message);
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    </script>
+</body>
+</html>
