@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vehicle Live Tracker</title>
+  <script>
+    let vehicleId = prompt("Enter your Vehicle ID:"); // ask each driver
+
+    function sendLocation(lat, lng, speed) {
+      fetch("/update_location", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          vehicle_id: vehicleId,
+          lat: lat,
+          lng: lng,
+          speed: speed
+        })
+      })
+      .then(res => res.json())
+      .then(data => console.log("Server response:", data))
+      .catch(err => console.error("Error:", err));
+    }
+
+    function trackLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+          position => {
+            let lat = position.coords.latitude;
+            let lng = position.coords.longitude;
+            let speed = position.coords.speed || 0;
+            console.log("My Location:", lat, lng, speed);
+            sendLocation(lat, lng, speed);
+          },
+          error => {
+            console.error("Error getting location:", error);
+          },
+          { enableHighAccuracy: true }
+        );
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    }
+
+    window.onload = trackLocation;
+  </script>
+</head>
+<body>
+  <h1>📍 Vehicle Live Tracker</h1>
+  <p>Tracking in real-time…</p>
+</body>
+</html>
